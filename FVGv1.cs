@@ -27,7 +27,6 @@ namespace NinjaTrader.NinjaScript.Indicators
     public class FVGv1 : Indicator
     {
         private int bar;
-        private int LastBar = 0;
 
         int n = 0;
         int m = 0;
@@ -43,10 +42,10 @@ namespace NinjaTrader.NinjaScript.Indicators
         //private Line bulllowline;
         //private Line bearlowline;
 
-        //private List<Line> bullhighlinearr;
-        //private List<Line> bulllowlinearr;
-        //private List<Line> bearhighlinearr;
-        //private List<Line> bearlowlinearr;
+        private List<string> bullhighlinearr = new List<string>();
+        private List<string> bulllowlinearr = new List<string>();
+        private List<string> bearhighlinearr = new List<string>();
+        private List<string> bearlowlinearr = new List<string>();
         // private label bearbpr = na;
         // private label bullbpr = na;
 
@@ -111,7 +110,7 @@ namespace NinjaTrader.NinjaScript.Indicators
             res == "60" ? 60 :
             res == "" ? BarsPeriod.Value : 1;
 
-            int ms = multi * mins * 60 * 1000;
+            int ms = multi * mins * 1000;
             return ms;
         }
         protected int nearest(int prev, int curr, int target)
@@ -153,15 +152,16 @@ namespace NinjaTrader.NinjaScript.Indicators
         {
             bar = ResolutionToSec();
             if (CurrentBar < 2) return;
+
             BullFVGCheck();
             BearFVGCheck();
-            DrawFVG();
-            LastBar = CurrentBar;
+            DrawBullFVG();
+            DrawBearFVG();
         }
 
         private void BullFVGCheck()
         {
-            if(High[2] < Low[0])
+            if (High[2] < Low[0])
             {
                 bullfvghigh.Add(High[2]);
                 bullfvglow.Add(Low[0]);
@@ -169,18 +169,18 @@ namespace NinjaTrader.NinjaScript.Indicators
                 bullfvglowt.Add(Time[0]);
             }
 
-            if(bullfvglow.Count > 0)
+            if (bullfvglow.Count > 0)
             {
-                for( int x = bullfvglow.Count - 1; x >= 0; x--)
+                for (int x = bullfvglow.Count - 1; x >= 0; x--)
                 {
-                    if(mit == "no mitigation")
+                    if (mit == "no mitigation")
                     {
-                        if((Time[0] - bullfvghight[x]).TotalMilliseconds <= Lookback * (bar+2))
+                        if ((Time[0] - bullfvghight[x]).TotalMilliseconds <= Lookback * (bar + 2))
                         {
-                            bullfvghightemp.Add(bullfvghigh[n]);
-                            bullfvghighttemp.Add(bullfvghight[n]);
-                            bullfvglowtemp.Add(bullfvglow[n]);
-                            bullfvglowttemp.Add(bullfvglowt[n]);
+                            bullfvghightemp.Add(bullfvghigh[x]);
+                            bullfvghighttemp.Add(bullfvghight[x]);
+                            bullfvglowtemp.Add(bullfvglow[x]);
+                            bullfvglowttemp.Add(bullfvglowt[x]);
                         }
                     }
                 }
@@ -197,19 +197,50 @@ namespace NinjaTrader.NinjaScript.Indicators
         }
         private void BearFVGCheck()
         {
+            if (High[0] < Low[2])
+            {
+                bearfvghigh.Add(High[0]);
+                bearfvglow.Add(Low[2]);
+                bearfvghight.Add(Time[0]);
+                bearfvglowt.Add(Time[2]);
+            }
 
+            if (bearfvglow.Count > 0)
+            {
+                for (int x = bearfvglow.Count - 1; x >= 0; x--)
+                {
+                    if (mit == "no mitigation")
+                    {
+                        if ((Time[0] - bearfvglowt[x]).TotalMilliseconds <= Lookback * (bar + 2))
+                        {
+                            bearfvghightemp.Add(bearfvghigh[x]);
+                            bearfvghighttemp.Add(bearfvghight[x]);
+                            bearfvglowtemp.Add(bearfvglow[x]);
+                            bearfvglowttemp.Add(bearfvglowt[x]);
+                        }
+                    }
+                }
+            }
+            bearfvghigh = bearfvghightemp.ToList();
+            bearfvghight = bearfvghighttemp.ToList();
+            bearfvglow = bearfvglowtemp.ToList();
+            bearfvglowt = bearfvglowttemp.ToList();
+
+            bearfvghightemp.Clear();
+            bearfvghighttemp.Clear();
+            bearfvglowtemp.Clear();
+            bearfvglowttemp.Clear();
         }
 
-        private void DrawFVG()
+        private void DrawBullFVG()
         {
-            //if (LastBar != CurrentBar) return;
-            if(bullfvghigh.Count > 0)
+            if (bullfvghigh.Count > 0)
             {
                 n = 0;
                 prevnearbull = High[0];
-                for(int x= bullfvghigh.Count - 1; x >= 0; x--)
+                for (int x = bullfvghigh.Count - 1; x >= 0; x--)
                 {
-                    if(Math.Abs(Close[0] - (bullfvglow[x] - (bullfvglow[x] - bullfvghigh[x])/2)) < prevnearbull)
+                    if (Math.Abs(Close[0] - (bullfvglow[x] - (bullfvglow[x] - bullfvghigh[x]) / 2)) < prevnearbull)
                     {
                         prevnearbull = Math.Abs(Close[0] - (bullfvglow[x] - (bullfvglow[x] - bullfvghigh[x])) / 2);
                         n = x;
@@ -218,11 +249,58 @@ namespace NinjaTrader.NinjaScript.Indicators
 
                 Draw.Line(this, "bullhighline" + CurrentBar, false, bullfvghight[n], bullfvghigh[n], Time[0], bullfvghigh[n], Bullfvg, DashStyleHelper.Solid, 1);
                 Draw.Line(this, "bulllowline" + CurrentBar, false, bullfvglowt[n], bullfvglow[n], Time[0], bullfvglow[n], Bullfvg, DashStyleHelper.Solid, 1);
-                //Draw.Line(this, "bullhighline", false, bullfvghight[n], bullfvghigh[n], Time[0] + new TimeSpan(0, 0, 0, 0, bar * 2), bullfvghigh[n], Bullfvg, DashStyleHelper.Solid, 1);
-                //Draw.Line(this, "bulllowline", false, bullfvglowt[n], bullfvglow[n], Time[0] + new TimeSpan(0, 0, 0, 0, bar * 2), bullfvglow[n], Bullfvg, DashStyleHelper.Solid, 1);
+
+                bullhighlinearr.Add("bullhighline" + CurrentBar);
+                bulllowlinearr.Add("bulllowline" + CurrentBar);
+            }
+
+            if (bullhighlinearr.Count > 1)
+            {
+                string delTag;
+                delTag = bullhighlinearr[0];
+                bullhighlinearr.RemoveAt(0);
+                RemoveDrawObject(delTag);
+
+                delTag = bulllowlinearr[0];
+                bulllowlinearr.RemoveAt(0);
+                RemoveDrawObject(delTag);
             }
         }
 
+        private void DrawBearFVG()
+        {
+            if (bearfvghigh.Count > 0)
+            {
+                m = 0;
+                prevnearbear = High[0];
+                for (int x = bearfvghigh.Count - 1; x >= 0; x--)
+                {
+                    if (Math.Abs(Close[0] - (bearfvglow[x] - (bearfvglow[x] - bearfvglow[x]) / 2)) < prevnearbear)
+                    {
+                        prevnearbear = Math.Abs(Close[0] - (bearfvglow[x] - (bearfvglow[x] - bearfvglow[x])) / 2);
+                        m = x;
+                    }
+                }
+
+                Draw.Line(this, "bearhighline" + CurrentBar, false, bearfvghight[m], bearfvghigh[m], Time[0], bearfvghigh[m], Bearfvg, DashStyleHelper.Solid, 1);
+                Draw.Line(this, "bearlowline" + CurrentBar, false, bearfvglowt[m], bearfvglow[m], Time[0], bearfvglow[m], Bearfvg, DashStyleHelper.Solid, 1);
+
+                bearhighlinearr.Add("bearhighline" + CurrentBar);
+                bearlowlinearr.Add("bearlowline" + CurrentBar);
+            }
+
+            if (bearhighlinearr.Count > 1)
+            {
+                string delTag;
+                delTag = bearhighlinearr[0];
+                bearhighlinearr.RemoveAt(0);
+                RemoveDrawObject(delTag);
+
+                delTag = bearlowlinearr[0];
+                bearlowlinearr.RemoveAt(0);
+                RemoveDrawObject(delTag);
+            }
+        }
         #region Properties
         [NinjaScriptProperty]
         [XmlIgnore]
@@ -269,55 +347,55 @@ namespace NinjaTrader.NinjaScript.Indicators
 
 namespace NinjaTrader.NinjaScript.Indicators
 {
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private FVGv1[] cacheFVGv1;
-		public FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-		{
-			return FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
-		}
+    public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
+    {
+        private FVGv1[] cacheFVGv1;
+        public FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
+        {
+            return FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
+        }
 
-		public FVGv1 FVGv1(ISeries<double> input, Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-		{
-			if (cacheFVGv1 != null)
-				for (int idx = 0; idx < cacheFVGv1.Length; idx++)
-					if (cacheFVGv1[idx] != null && cacheFVGv1[idx].Bullfvg == bullfvg && cacheFVGv1[idx].Bearfvg == bearfvg && cacheFVGv1[idx].Lookback == lookback && cacheFVGv1[idx].Bprs == bprs && cacheFVGv1[idx].EqualsInput(input))
-						return cacheFVGv1[idx];
-			return CacheIndicator<FVGv1>(new FVGv1(){ Bullfvg = bullfvg, Bearfvg = bearfvg, Lookback = lookback, Bprs = bprs }, input, ref cacheFVGv1);
-		}
-	}
+        public FVGv1 FVGv1(ISeries<double> input, Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
+        {
+            if (cacheFVGv1 != null)
+                for (int idx = 0; idx < cacheFVGv1.Length; idx++)
+                    if (cacheFVGv1[idx] != null && cacheFVGv1[idx].Bullfvg == bullfvg && cacheFVGv1[idx].Bearfvg == bearfvg && cacheFVGv1[idx].Lookback == lookback && cacheFVGv1[idx].Bprs == bprs && cacheFVGv1[idx].EqualsInput(input))
+                        return cacheFVGv1[idx];
+            return CacheIndicator<FVGv1>(new FVGv1() { Bullfvg = bullfvg, Bearfvg = bearfvg, Lookback = lookback, Bprs = bprs }, input, ref cacheFVGv1);
+        }
+    }
 }
 
 namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
 {
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-		{
-			return indicator.FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
-		}
+    public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
+    {
+        public Indicators.FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
+        {
+            return indicator.FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
+        }
 
-		public Indicators.FVGv1 FVGv1(ISeries<double> input , Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-		{
-			return indicator.FVGv1(input, bullfvg, bearfvg, lookback, bprs);
-		}
-	}
+        public Indicators.FVGv1 FVGv1(ISeries<double> input, Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
+        {
+            return indicator.FVGv1(input, bullfvg, bearfvg, lookback, bprs);
+        }
+    }
 }
 
 namespace NinjaTrader.NinjaScript.Strategies
 {
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-		{
-			return indicator.FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
-		}
+    public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
+    {
+        public Indicators.FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
+        {
+            return indicator.FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
+        }
 
-		public Indicators.FVGv1 FVGv1(ISeries<double> input , Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-		{
-			return indicator.FVGv1(input, bullfvg, bearfvg, lookback, bprs);
-		}
-	}
+        public Indicators.FVGv1 FVGv1(ISeries<double> input, Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
+        {
+            return indicator.FVGv1(input, bullfvg, bearfvg, lookback, bprs);
+        }
+    }
 }
 
 #endregion
