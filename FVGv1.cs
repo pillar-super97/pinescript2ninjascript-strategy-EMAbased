@@ -50,25 +50,25 @@ namespace NinjaTrader.NinjaScript.Indicators
         // private label bearbpr = na;
         // private label bullbpr = na;
 
-        private List<DateTime> bullfvghight;
-        private List<DateTime> bullfvglowt;
-        private List<DateTime> bearfvghight;
-        private List<DateTime> bearfvglowt;
+        private List<DateTime> bullfvghight = new List<DateTime>();
+        private List<DateTime> bullfvglowt = new List<DateTime>();
+        private List<DateTime> bearfvghight = new List<DateTime>();
+        private List<DateTime> bearfvglowt = new List<DateTime>();
 
-        private List<DateTime> bullfvghighttemp;
-        private List<DateTime> bullfvglowttemp;
-        private List<DateTime> bearfvghighttemp;
-        private List<DateTime> bearfvglowttemp;
+        private List<DateTime> bullfvghighttemp = new List<DateTime>();
+        private List<DateTime> bullfvglowttemp = new List<DateTime>();
+        private List<DateTime> bearfvghighttemp = new List<DateTime>();
+        private List<DateTime> bearfvglowttemp = new List<DateTime>();
         //array.copy;
-        private List<double> bullfvghigh;
-        private List<double> bullfvglow;
-        private List<double> bearfvghigh;
-        private List<double> bearfvglow;
+        private List<double> bullfvghigh = new List<double>();
+        private List<double> bullfvglow = new List<double>();
+        private List<double> bearfvghigh = new List<double>();
+        private List<double> bearfvglow = new List<double>();
 
-        private List<double> bullfvghightemp;
-        private List<double> bullfvglowtemp;
-        private List<double> bearfvghightemp;
-        private List<double> bearfvglowtemp;
+        private List<double> bullfvghightemp = new List<double>();
+        private List<double> bullfvglowtemp = new List<double>();
+        private List<double> bearfvghightemp = new List<double>();
+        private List<double> bearfvglowtemp = new List<double>();
 
         string mit = "no mitigation";
 
@@ -143,8 +143,6 @@ namespace NinjaTrader.NinjaScript.Indicators
                 Lookback = 50;
                 Bprs = true;
 
-                bar = ResolutionToSec();
-
             }
             else if (State == State.Configure)
             {
@@ -153,6 +151,7 @@ namespace NinjaTrader.NinjaScript.Indicators
 
         protected override void OnBarUpdate()
         {
+            bar = ResolutionToSec();
             if (CurrentBar < 2) return;
             BullFVGCheck();
             BearFVGCheck();
@@ -178,18 +177,18 @@ namespace NinjaTrader.NinjaScript.Indicators
                     {
                         if((Time[0] - bullfvghight[x]).TotalMilliseconds <= Lookback * (bar+2))
                         {
-                            bullfvghigh.Add(bullfvghightemp[n]);
-                            bullfvghight.Add(bullfvghighttemp[n]);
-                            bullfvglow.Add(bullfvglowtemp[n]);
-                            bullfvglowt.Add(bullfvglowttemp[n]);
+                            bullfvghightemp.Add(bullfvghigh[n]);
+                            bullfvghighttemp.Add(bullfvghight[n]);
+                            bullfvglowtemp.Add(bullfvglow[n]);
+                            bullfvglowttemp.Add(bullfvglowt[n]);
                         }
                     }
                 }
             }
-            bullfvghigh = bullfvghightemp;
-            bullfvghight = bullfvghighttemp;
-            bullfvglow = bullfvglowtemp;
-            bullfvglowt = bullfvglowttemp;
+            bullfvghigh = bullfvghightemp.ToList();
+            bullfvghight = bullfvghighttemp.ToList();
+            bullfvglow = bullfvglowtemp.ToList();
+            bullfvglowt = bullfvglowttemp.ToList();
 
             bullfvghightemp.Clear();
             bullfvghighttemp.Clear();
@@ -203,7 +202,7 @@ namespace NinjaTrader.NinjaScript.Indicators
 
         private void DrawFVG()
         {
-            if (LastBar != CurrentBar) return;
+            //if (LastBar != CurrentBar) return;
             if(bullfvghigh.Count > 0)
             {
                 n = 0;
@@ -217,8 +216,10 @@ namespace NinjaTrader.NinjaScript.Indicators
                     }
                 }
 
-                Draw.Line(this, "bullhighline", false, bullfvghight[n], bullfvghigh[n], Time[0] + new TimeSpan(bar * 2), bullfvghigh[n], Bullfvg, DashStyleHelper.Solid, 1);
-                Draw.Line(this, "bullhighline", false, bullfvglowt[n], bullfvglow[n], Time[0] + new TimeSpan(bar * 2), bullfvglow[n], Bullfvg, DashStyleHelper.Solid, 1);
+                Draw.Line(this, "bullhighline" + CurrentBar, false, bullfvghight[n], bullfvghigh[n], Time[0], bullfvghigh[n], Bullfvg, DashStyleHelper.Solid, 1);
+                Draw.Line(this, "bulllowline" + CurrentBar, false, bullfvglowt[n], bullfvglow[n], Time[0], bullfvglow[n], Bullfvg, DashStyleHelper.Solid, 1);
+                //Draw.Line(this, "bullhighline", false, bullfvghight[n], bullfvghigh[n], Time[0] + new TimeSpan(0, 0, 0, 0, bar * 2), bullfvghigh[n], Bullfvg, DashStyleHelper.Solid, 1);
+                //Draw.Line(this, "bulllowline", false, bullfvglowt[n], bullfvglow[n], Time[0] + new TimeSpan(0, 0, 0, 0, bar * 2), bullfvglow[n], Bullfvg, DashStyleHelper.Solid, 1);
             }
         }
 
