@@ -429,59 +429,70 @@ namespace NinjaTrader.NinjaScript.Indicators
     }
 }
 
+namespace MitEnumNamespace
+{
+    public enum UniversalMovingAverage
+    {
+        EMA,
+        HMA,
+        SMA,
+        WMA,
+    }
+}
+
 #region NinjaScript generated code. Neither change nor remove.
 
 namespace NinjaTrader.NinjaScript.Indicators
 {
-    public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-    {
-        private FVGv1[] cacheFVGv1;
-        public FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-        {
-            return FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
-        }
+	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
+	{
+		private FVGv1[] cacheFVGv1;
+		public FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, string mit, bool bprs)
+		{
+			return FVGv1(Input, bullfvg, bearfvg, lookback, mit, bprs);
+		}
 
-        public FVGv1 FVGv1(ISeries<double> input, Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-        {
-            if (cacheFVGv1 != null)
-                for (int idx = 0; idx < cacheFVGv1.Length; idx++)
-                    if (cacheFVGv1[idx] != null && cacheFVGv1[idx].Bullfvg == bullfvg && cacheFVGv1[idx].Bearfvg == bearfvg && cacheFVGv1[idx].Lookback == lookback && cacheFVGv1[idx].Bprs == bprs && cacheFVGv1[idx].EqualsInput(input))
-                        return cacheFVGv1[idx];
-            return CacheIndicator<FVGv1>(new FVGv1() { Bullfvg = bullfvg, Bearfvg = bearfvg, Lookback = lookback, Bprs = bprs }, input, ref cacheFVGv1);
-        }
-    }
+		public FVGv1 FVGv1(ISeries<double> input, Brush bullfvg, Brush bearfvg, int lookback, string mit, bool bprs)
+		{
+			if (cacheFVGv1 != null)
+				for (int idx = 0; idx < cacheFVGv1.Length; idx++)
+					if (cacheFVGv1[idx] != null && cacheFVGv1[idx].Bullfvg == bullfvg && cacheFVGv1[idx].Bearfvg == bearfvg && cacheFVGv1[idx].Lookback == lookback && cacheFVGv1[idx].Mit == mit && cacheFVGv1[idx].Bprs == bprs && cacheFVGv1[idx].EqualsInput(input))
+						return cacheFVGv1[idx];
+			return CacheIndicator<FVGv1>(new FVGv1(){ Bullfvg = bullfvg, Bearfvg = bearfvg, Lookback = lookback, Mit = mit, Bprs = bprs }, input, ref cacheFVGv1);
+		}
+	}
 }
 
 namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
 {
-    public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-    {
-        public Indicators.FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-        {
-            return indicator.FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
-        }
+	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
+	{
+		public Indicators.FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, string mit, bool bprs)
+		{
+			return indicator.FVGv1(Input, bullfvg, bearfvg, lookback, mit, bprs);
+		}
 
-        public Indicators.FVGv1 FVGv1(ISeries<double> input, Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-        {
-            return indicator.FVGv1(input, bullfvg, bearfvg, lookback, bprs);
-        }
-    }
+		public Indicators.FVGv1 FVGv1(ISeries<double> input , Brush bullfvg, Brush bearfvg, int lookback, string mit, bool bprs)
+		{
+			return indicator.FVGv1(input, bullfvg, bearfvg, lookback, mit, bprs);
+		}
+	}
 }
 
 namespace NinjaTrader.NinjaScript.Strategies
 {
-    public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-    {
-        public Indicators.FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-        {
-            return indicator.FVGv1(Input, bullfvg, bearfvg, lookback, bprs);
-        }
+	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
+	{
+		public Indicators.FVGv1 FVGv1(Brush bullfvg, Brush bearfvg, int lookback, string mit, bool bprs)
+		{
+			return indicator.FVGv1(Input, bullfvg, bearfvg, lookback, mit, bprs);
+		}
 
-        public Indicators.FVGv1 FVGv1(ISeries<double> input, Brush bullfvg, Brush bearfvg, int lookback, bool bprs)
-        {
-            return indicator.FVGv1(input, bullfvg, bearfvg, lookback, bprs);
-        }
-    }
+		public Indicators.FVGv1 FVGv1(ISeries<double> input , Brush bullfvg, Brush bearfvg, int lookback, string mit, bool bprs)
+		{
+			return indicator.FVGv1(input, bullfvg, bearfvg, lookback, mit, bprs);
+		}
+	}
 }
 
 #endregion
