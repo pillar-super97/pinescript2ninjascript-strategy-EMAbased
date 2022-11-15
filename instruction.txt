@@ -1,0 +1,91 @@
+I'll explain with long position (short position is opposite)
+
+== Strategy 1
+
+1) Entry condition
+- Current volume amount should be BIGGER than average past 21 volume amount, in the market.
+	volume > avrg * 1.5
+- Close price should be CROSS OVER the trend trader curve
+	crossover(close,ret)
+- Close price should be bigger than EMA(200)
+	close>ema
+- Close price should be bigger than EMA(800)
+	close>ema2
+- Current position should be flat
+	sps==0
+2) Exit condition (stop loss is updated)
+- The INITIAL STOP LOSS is the high price of the bar before the entry bar.
+- When close price increases, so 99% of close price is bigger than stop loss, then update stop loss by 99% of close price. So stop loss increases.
+- When price meet stop loss, then exit 100% of position.
+
+== Strategy 2
+
+1) Entry condition
+- Current volume amount should be BIGGER than average past 21 volume amount, in the market.
+	volume > avrg * 1.5
+- Close price should be CROSS OVER the trend trader curve
+	crossover(close,ret)
+- Close price should be smaller than EMA(200)
+	close < ema
+- Close price should be bigger than EMA(800)
+	close > ema2
+- Current position should be flat
+	sps==0
+
+2) Exit condition (stop loss is updated)
+- The INITIAL STOP LOSS is the high price of the bar before the entry bar.
+- When close price increases, so 99% of close price is bigger than stop loss and EMA 200, then update stop loss by 99% of close price. So stop loss increases.
+- When price meet stop loss, then exit 100% of position.
+
+
+== Strategy 3
+
+1) Entry condition
+- Current volume amount should be BIGGER than average past 21 volume amount, in the market.
+	volume > avrg * 1.5
+- Close price should be CROSS OVER the trend trader curve
+	crossover(close,ret)
+- Close price should be smaller than EMA(200)
+	close < ema
+- Close price should be smaller than EMA(800)
+	close < ema2
+- Current position should be flat
+	sps==0
+
+2) Exit condition (stop loss is updated) (SAME AS strategy 2)
+
+== Strategy 4
+
+1) Entry condition
+- Current volume amount should be BIGGER than average past 21 volume amount, in the market.
+	volume > avrg * 1.5
+- Close price should be CROSS OVER the EMA 200 curve
+	crossover(close, ema)
+- Close price should be bigger than trend trader price
+	close > ret
+- Close price should be bigger than EMA(800)
+	close > ema2
+- Current position should be flat
+	sps==0
+
+2) Exit condition (stop loss is updated) (SAME AS strategy 1)
+
+== Strategy 5
+
+1) Entry condition
+- Current volume amount should be BIGGER than average past 21 volume amount, in the market.
+	volume > avrg * 1.5
+- Close price should be CROSS OVER the EMA 200 curve
+	crossover(close, ema)
+- Close price should be bigger than trend trader price
+	close > ret
+- Close price should be smaller than EMA(800)
+	close < ema2
+- Current position should be flat
+	sps==0
+
+2) Exit condition (stop loss is updated) (SAME AS strategy 1)
+
+=======================================================================
+Entry conditions are different for each strategy, so these are independent each other.
+The main idea of these strategies are dynamically increasing(LONG) stop loss, to prevent loss of shades.
